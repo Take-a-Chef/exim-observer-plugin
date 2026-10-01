@@ -59,6 +59,6 @@ in [events](docs/events.md); this is not complete lifecycle coverage.
 - [Architecture](docs/architecture.md), [protocol boundary](docs/protocol.md),
   [security](docs/security.md), [contribution process](CONTRIBUTING.md)
 - [Exim Observer Protocol](https://github.com/Take-a-Chef/exim-observer-protocol)
-- [Exim Observer](https://github.com/inode64/exim-observer)
+- [Exim Observer](https://github.com/Take-a-Chef/exim-observer)
 
 Python is used only for build/test tooling. Runtime plugin and codec code are C.

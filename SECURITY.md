@@ -4,7 +4,7 @@ This experimental milestone has no production-supported releases. Parser bugs,
 malformed-input crashes, privilege mistakes and interference with mail processing
 are security-sensitive even on local Unix sockets.
 
-Report sensitive findings privately to the inode64 maintainers. Use GitHub private
+Report sensitive findings privately to the project maintainers. Use GitHub private
 vulnerability reporting for this repository if enabled; otherwise contact the
 maintainer privately to arrange a secure report. Do not place credentials, private
 mail, exploit details or spool contents in public issues.

@@ -64,7 +64,7 @@ Other constraints identified in the sources:
 - Exim 4.100.1 adds proc:deliver and changes debug/log APIs.
 
 CI configuration is included, but no hosted CI run has been performed. The locked
-protocol revision must be available in inode64/exim-observer-protocol before its
+protocol revision must be available in Take-a-Chef/exim-observer-protocol before its
 checkout step can succeed. Minimal integration builds disable TLS, DKIM, DNSSEC,
 filters and optional authentication libraries; their behavior is not covered.
 

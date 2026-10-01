@@ -16,6 +16,8 @@ Software version and wire-protocol version are independent. All work is experime
 
 ### Changed
 
+- Use Take-a-Chef repository links and pin the protocol's module migration.
+
 - Limit strict warning enforcement to the plugin; preserve upstream Exim syntax
   and report its diagnostics separately.
 
