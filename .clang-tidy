@@ -1,0 +1,3 @@
+Checks: "-*,clang-analyzer-*,bugprone-*,performance-*,portability-*,cert-err34-c,readability-misleading-indentation,-bugprone-easily-swappable-parameters,-bugprone-unsafe-functions,-bugprone-not-null-terminated-result,-clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling"
+WarningsAsErrors: "*"
+HeaderFilterRegex: "(src|tests)/.*"

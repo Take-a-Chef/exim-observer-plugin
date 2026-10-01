@@ -1,0 +1,11 @@
+--- a/src/readconf.c
++++ b/src/readconf.c
+@@ -237,6 +237,8 @@
+ #endif
+   { "never_users",              opt_uidlist,     {&never_users} },
+   { "notifier_socket",          opt_stringptr,   {&notifier_socket} },
++  { "observer_enabled",        opt_misc_module, {US"observer"} },
++  { "observer_events_socket",  opt_misc_module, {US"observer"} },
+ #ifndef DISABLE_TLS
+   { "openssl_options",          opt_stringptr,   {&openssl_options} },
+ #endif

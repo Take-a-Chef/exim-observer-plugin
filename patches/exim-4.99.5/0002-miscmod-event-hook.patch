@@ -1,0 +1,61 @@
+--- a/src/structs.h
++++ b/src/structs.h
+@@ -1049,9 +1049,12 @@
+   unsigned	functions_count;
+   void *	variables;
+   unsigned	variables_count;
++
++  /* Synchronous notification only; must not alter mail processing. */
++  void		(*event)(const uschar *, const uschar *);
+ } misc_module_info;
+ 
+-#define MISC_MODULE_MAGIC	0x4d4d4d31	/* MMM1 */
++#define MISC_MODULE_MAGIC	0x4f425331	/* OBS1: local event-hook ABI; rebuild all misc modules */
+ 
+ #endif	/* whole file */
+ /* End of structs.h */
+--- a/src/functions.h
++++ b/src/functions.h
+@@ -371,6 +371,7 @@
+ extern misc_module_info * misc_mod_findonly(const uschar * modname);
+ extern int     misc_mod_msg_init(void);
+ extern void    misc_mod_smtp_reset(void);
++extern void    misc_mod_event(const uschar *, const uschar *);
+ 
+ extern uschar *moan_check_errorcopy(const uschar *);
+ extern BOOL    moan_skipped_syntax_errors(uschar *, error_block *, uschar *,
+--- a/src/drtables.c
++++ b/src/drtables.c
+@@ -560,6 +560,22 @@
+     if ((mi->msg_init)() != OK)
+       return FAIL;
+ return OK;
++}
++
++/* Notify synchronous listeners without changing event_action or errno.
++Callbacks must not retain the borrowed strings or raise recursive events. */
++
++void
++misc_mod_event(const uschar * event, const uschar * data)
++{
++int saved_errno = errno;
++for (const misc_module_info * mi = misc_module_list; mi; mi = mi->next)
++  if (mi->event)
++    {
++    errno = saved_errno;
++    (mi->event)(event, data);
++    }
++errno = saved_errno;
+ }
+ 
+ /* Ditto, authres.  Having to sort the responses (mainly for the testsuite)
+--- a/src/deliver.c
++++ b/src/deliver.c
+@@ -860,6 +860,7 @@
+ event_raise(const uschar * action, const uschar * event, const uschar * ev_data,
+   int * errnop)
+ {
++misc_mod_event(event, ev_data);
+ if (action)
+   {
+   const uschar * s;

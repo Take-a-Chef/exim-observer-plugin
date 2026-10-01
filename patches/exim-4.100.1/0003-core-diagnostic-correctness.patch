@@ -1,0 +1,23 @@
+--- a/src/smtp_in.c
++++ b/src/smtp_in.c
+@@ -1589,8 +1589,8 @@
+   g = string_append(g, 3, US" DN=\"", string_printing(tls_in.peerdn), US"\"");
+ if (LOGGING(tls_sni) && tls_in.sni)
+   g = string_append(g, 2, US" SNI=", string_printing2(tls_in.sni, SP_TAB|SP_SPACE));
++#endif
+ return g;
+-#endif
+ }
+ 
+ /* Append DSN information to a log line
+--- a/src/readconf.c
++++ b/src/readconf.c
+@@ -1833,7 +1833,7 @@
+   log_write_die(LOG_CONFIG_IN, CS unknown_txt, name);
+   }
+ 
+-if (ol->type & opt_set  &&  !ol->type & (opt_rep_con | opt_rep_str))
++if (ol->type & opt_set  &&  !(ol->type & (opt_rep_con | opt_rep_str)))
+   log_write_die(LOG_CONFIG_IN,
+     "%q option set for the second time", name);
+ 

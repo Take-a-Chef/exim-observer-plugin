@@ -1,0 +1,75 @@
+name: Native C compatibility
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: plugin-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  compatibility:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        exim: [4.99.5, 4.100.1]
+        cc: [gcc, clang]
+    defaults:
+      run:
+        working-directory: plugin
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          path: plugin
+      - name: Read reviewed protocol revision
+        id: protocol
+        run: |
+          python3 -c 'import json; print("revision=" + json.load(open("protocol.lock.json"))["revision"])' >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          repository: Take-a-Chef/exim-observer-protocol
+          ref: ${{ steps.protocol.outputs.revision }}
+          path: exim-observer-protocol
+      - name: Install explicit build prerequisites
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential clang libgdbm-dev libpcre2-dev
+      - name: Fetch checksum-pinned release
+        run: python3 scripts/fetch-exim.py --source-root .tools --version '${{ matrix.exim }}'
+      - name: Compile unit tests with warnings as errors
+        run: make unit CC='${{ matrix.cc }}' CFLAGS='-O2 -g -Werror'
+      - name: Build patched Exim and test native integration
+        run: make build integration EXIM_SOURCE_ROOT=.tools EXIM_VERSION='${{ matrix.exim }}' CC='${{ matrix.cc }}'
+  standalone:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: plugin
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          path: plugin
+      - id: protocol
+        run: |
+          python3 -c 'import json; print("revision=" + json.load(open("protocol.lock.json"))["revision"])' >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          repository: Take-a-Chef/exim-observer-protocol
+          ref: ${{ steps.protocol.outputs.revision }}
+          path: exim-observer-protocol
+      - run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential clang clang-format-18 clang-tidy cppcheck python3-yaml
+          mkdir -p .tools/bin
+          ln -s /usr/bin/clang-format-18 .tools/bin/clang-format
+          echo "$PWD/.tools/bin" >> "$GITHUB_PATH"
+      - uses: actions/setup-go@v6
+        with:
+          go-version: "1.27.x"
+          cache: false
+      - run: make check-protocol format-check lint test test-sanitize
+      - run: git diff --exit-code
